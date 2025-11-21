@@ -42,6 +42,7 @@ chatInput.addEventListener('input', function() {
 // --------------------------------------
 let isWaitingForImagePrompt = false;
 let isWaitingForEditPrompt = false;
+let isWaitingForCodePrompt = false;
 let imageForEditing = null;
 
 function addFeatureButtonListeners() {
@@ -58,6 +59,9 @@ function addFeatureButtonListeners() {
             if (featureText === 'Criar imagem') {
                 displayMessage('Qual imagem você gostaria de criar?', 'ai');
                 isWaitingForImagePrompt = true;
+            } else if (event.currentTarget.id === 'codeButton') {
+                displayMessage('O que você quer programar?', 'ai');
+                isWaitingForCodePrompt = true;
             } else {
                 chatInput.value = featureText;
                 chatInput.dispatchEvent(new Event('input'));
@@ -81,6 +85,7 @@ function startNewChat() {
     }
     isWaitingForImagePrompt = false;
     isWaitingForEditPrompt = false;
+    isWaitingForCodePrompt = false;
     imageForEditing = null;
     chatHistory = []; // Limpa o histórico de chat
 }
@@ -179,24 +184,28 @@ function sendMessage() {
         imageForEditing = null;
     } else {
         let finalMessage = message;
+        let requestType = 'chat';
         if (isWaitingForImagePrompt) {
             finalMessage = `criar imagem ${message}`;
             isWaitingForImagePrompt = false;
+        } else if (isWaitingForCodePrompt) {
+            requestType = 'code';
+            isWaitingForCodePrompt = false;
         }
         displayMessage(finalMessage, 'user');
         displayTypingIndicator();
         chatHistory.push({ role: 'user', content: finalMessage });
-        sendMessageToBackend(finalMessage);
+        sendMessageToBackend(finalMessage, null, requestType);
     }
 
     chatInput.value = '';
     chatInput.dispatchEvent(new Event('input'));
 }
 
-async function sendMessageToBackend(message, image_data = null) {
+async function sendMessageToBackend(message, image_data = null, requestType = 'chat') {
     const lowerCaseMessage = message.toLowerCase();
     let systemMessage = 'Você é um especialista altamente qualificado em sua área. Forneça respostas detalhadas, bem estruturadas e com um alto nível de conhecimento. Responda em português.';
-    let requestType = 'chat';
+    let endpoint;
     let requestBody = {};
 
     if (image_data) {
@@ -211,6 +220,9 @@ async function sendMessageToBackend(message, image_data = null) {
         requestType = 'image';
         const prompt = message.substring('criar imagem'.length).trim();
         requestBody = { type: 'image', prompt: prompt };
+    } else if (requestType === 'code') {
+        systemMessage = 'Você é um engenheiro de software sênior e arquiteto de soluções com décadas de experiência. Sua tarefa é gerar código de altíssima qualidade, seguindo as melhores práticas e padrões de projeto. O código deve ser claro, eficiente, escalável, bem documentado e robusto. Forneça a solução completa, incluindo quaisquer arquivos de configuração, testes ou explicações necessárias.';
+        requestBody = { type: 'chat', messages: chatHistory, systemMessage: systemMessage, model: 'gpt-4o' };
     } else {
         const modelSelector = document.getElementById('modelSelector');
         const selectedModel = modelSelector.value;

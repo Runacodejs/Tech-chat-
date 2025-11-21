@@ -103,8 +103,28 @@ app.post('/api/index.js', async (req, res) => {
             body: JSON.stringify(payload),
         });
 
+    } else if (type === 'code') {
+        endpoint = 'https://api.openai.com/v1/chat/completions';
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: 'Você é um engenheiro de software sênior e arquiteto de soluções com décadas de experiência. Sua tarefa é gerar código de altíssima qualidade, seguindo as melhores práticas e padrões de projeto. O código deve ser claro, eficiente, escalável, bem documentado e robusto. Forneça a solução completa, incluindo quaisquer arquivos de configuração, testes ou explicações necessárias.' },
+                ...messages
+            ],
+            max_tokens: 2048,
+            temperature: 0.7,
+            top_p: 0.9,
+        };
+        openaiResponse = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
     } else {
-      return res.status(400).json({ error: 'Tipo de requisição inválido. Deve ser "image", "chat" ou "image-edit".' });
+      return res.status(400).json({ error: 'Tipo de requisição inválido. Deve ser "image", "chat", "image-edit" ou "code".' });
     }
 
     const data = await openaiResponse.json();

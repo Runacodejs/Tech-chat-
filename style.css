@@ -1,0 +1,556 @@
+:root {
+    --sidebar-width: 250px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh; /* Changed from min-height to height */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent body from scrolling */
+    position: relative;
+}
+
+/* -------------------------------------- */
+/* Page & Main Content Layout */
+/* -------------------------------------- */
+.page-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden; /* Contain children */
+}
+
+.main-content {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 800px; 
+    padding: 20px;
+    padding-bottom: 140px; /* Increased padding for bottom bar */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Make chat scrollable */
+    scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+.main-content h1 {
+    font-size: 28px;
+    margin-bottom: 40px;
+    color: #fff;
+}
+
+/* -------------------------------------- */
+/* Chat Message Styles */
+/* -------------------------------------- */
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    max-width: 70%;
+    line-height: 1.5;
+    position: relative;
+    word-wrap: break-word; /* Ensure long words don't overflow */
+}
+
+.user-message {
+    background-color: #5d3fd3;
+    color: #fff;
+    align-self: flex-end;
+}
+
+.ai-message {
+    background-color: #222;
+    color: #fff;
+    align-self: flex-start;
+}
+
+.message pre {
+    white-space: pre-wrap; /* Wrap code blocks */
+    word-wrap: break-word;
+    background-color: #111;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.copy-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #444;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.message:hover .copy-button {
+    opacity: 1;
+}
+
+.copy-button:hover {
+    background-color: #666;
+}
+
+.image-container {
+    position: relative;
+}
+
+.download-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* -------------------------------------- */
+/* Typing Indicator */
+/* -------------------------------------- */
+.typing-indicator-container {
+    align-self: flex-start;
+    margin: 0 0 10px 0;
+}
+
+.typing-indicator {
+    display: flex;
+    padding: 10px;
+    background-color: #222;
+    border-radius: 18px;
+}
+
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background: #888;
+    border-radius: 50%;
+    margin: 0 4px;
+    animation: bounce 1s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* -------------------------------------- */
+/* Sidebar Styles */
+/* -------------------------------------- */
+.sidebar {
+    height: 100%;
+    width: var(--sidebar-width);
+    position: fixed;
+    z-index: 20;
+    top: 0;
+    left: 0;
+    background-color: #000;
+    padding: 20px;
+    padding-top: 50px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 10px;
+    margin: 10px 0;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.sidebar-item:hover {
+    background-color: #1a1a1a;
+}
+
+.sidebar-item i {
+    font-size: 22px;
+    margin-right: 15px;
+    width: 30px;
+    text-align: center;
+}
+
+.sidebar .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #2e2e2e;
+    border-radius: 25px;
+    padding: 10px 15px;
+    margin-bottom: 30px;
+}
+
+.sidebar .search-bar input {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    flex-grow: 1;
+    padding: 0 10px;
+    outline: none;
+}
+
+.sidebar .search-bar i.fa-search {
+    color: #ccc;
+    font-size: 18px;
+}
+
+.sidebar .edit-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    display: none;
+}
+
+/* -------------------------------------- */
+/* Top Bar Styles */
+/* -------------------------------------- */
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 0 20px;
+    max-width: 800px;
+    box-sizing: border-box;
+    flex-shrink: 0; /* Prevent top bar from shrinking */
+}
+
+.top-bar .menu-icon {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.top-bar .upgrade-button {
+    background-color: #5d3fd3;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.top-bar .refresh-icon {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* -------------------------------------- */
+/* Feature Grid (Initial Screen) */
+/* -------------------------------------- */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.feature-button {
+    background-color: #222;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 10px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.feature-button:hover {
+    background-color: #333;
+}
+
+/* -------------------------------------- */
+/* Bottom Bar & Input Styles */
+/* -------------------------------------- */
+.bottom-bar {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    background-color: #000; /* To prevent content from showing through */
+    box-sizing: border-box;
+    flex-shrink: 0; /* Prevent bottom bar from shrinking */
+}
+
+.bottom-bar .add-button {
+    background-color: #222;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.bottom-bar .search-input-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    background-color: #222;
+    border-radius: 25px;
+    padding: 8px 15px;
+    max-width: 800px;
+    position: relative;
+}
+
+.bottom-bar input[type="text"] {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    padding: 5px 0;
+    outline: none;
+    padding-right: 70px; 
+}
+
+.bottom-bar input[type="text"]::placeholder {
+    color: #888;
+}
+
+.voice-icons {
+    display: flex;
+    position: absolute;
+    right: 60px;
+}
+
+.bottom-bar .mic-icon,
+.bottom-bar .wave-icon {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.bottom-bar .wave-icon {
+    display: none;
+}
+
+.send-button {
+    position: absolute;
+    right: 15px;
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* -------------------------------------- */
+/* Modal Styles */
+/* -------------------------------------- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 30;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.modal-content {
+    background-color: #1c1c1c;
+    margin: 0 auto 80px;
+    padding: 20px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: space-around;
+    animation-name: slideUp;
+    animation-duration: 0.3s;
+}
+
+@keyframes slideUp {
+    from {transform: translateY(100px); opacity: 0}
+    to {transform: translateY(0); opacity: 1}
+}
+
+.modal-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 14px;
+}
+
+.modal-item i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    background-color: #333;
+    padding: 15px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-item:hover {
+    opacity: 0.8;
+}
+
+/* -------------------------------------- */
+/* Responsividade */
+/* -------------------------------------- */
+
+@media (min-width: 769px) {
+    .feature-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .main-content h1 {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding-bottom: 120px; /* Adjust for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        -webkit-text-size-adjust: 100%;
+    }
+    
+    .sidebar {
+        width: 100%; 
+        transform: translateX(-100%);
+    }
+
+    .main-content {
+        padding-bottom: 100px; /* Adjust for mobile */
+    }
+
+    .main-content h1 {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 90%; 
+    }
+    
+    .bottom-bar {
+        padding: 10px;
+    }
+
+    .bottom-bar .search-input-container {
+        padding: 5px 10px;
+    }
+    
+    .bottom-bar input[type="text"] {
+        padding-right: 60px; 
+    }
+
+    .send-button {
+        right: 10px; 
+    }
+
+    .voice-icons {
+        right: 50px; 
+    }
+}

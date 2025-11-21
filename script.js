@@ -201,7 +201,7 @@ async function sendMessageToBackend(message, image_data = null) {
 
     if (image_data) {
         requestType = 'image-edit';
-        systemMessage = 'Você é um especialista em edição de fotos. Sua tarefa é editar a imagem fornecida com base nas instruções do usuário. Retorne apenas a imagem editada, sem nenhum texto adicional.';
+        systemMessage = 'Você é um assistente de edição de imagens avançado. Sua tarefa é analisar a imagem e o prompt do usuário para realizar edições precisas. Você pode remover o fundo, apagar objetos, alterar cores, aplicar estilos e muito mais. Siga as instruções do usuário à risca e retorne apenas a imagem editada, sem nenhum texto ou comentário adicional.';
         requestBody = {
             type: 'image-edit',
             image: image_data,

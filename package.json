@@ -1,5 +1,21 @@
 {
+  "name": "ai-chat-bot",
+  "version": "1.0.0",
+  "description": "A versatile AI assistant",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js"
+  },
   "dependencies": {
-    "openai": "^6.7.0"
-  }
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^4.52.7"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "author": "",
+  "license": "ISC"
 }

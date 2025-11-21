@@ -212,7 +212,9 @@ async function sendMessageToBackend(message, image_data = null) {
         const prompt = message.substring('criar imagem'.length).trim();
         requestBody = { type: 'image', prompt: prompt };
     } else {
-        requestBody = { type: 'chat', messages: chatHistory, systemMessage: systemMessage };
+        const modelSelector = document.getElementById('modelSelector');
+        const selectedModel = modelSelector.value;
+        requestBody = { type: 'chat', messages: chatHistory, systemMessage: systemMessage, model: selectedModel };
     }
 
     try {

@@ -1,8 +1,19 @@
 
+const express = require('express');
+const bodyParser = require('body-parser');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 
-module.exports = async (req, res) => {
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// Servir arquivos estáticos da raiz do projeto (para index.html, script.js, etc.)
+app.use(express.static(__dirname + '/..'));
+
+app.post('/api/index.js', async (req, res) => {
   // Define os cabeçalhos CORS para permitir requisições de qualquer origem
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -13,12 +24,6 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  // Permite apenas o método POST
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
-  }
-
   // Obtém a chave da API das variáveis de ambiente do servidor
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -27,7 +32,7 @@ module.exports = async (req, res) => {
 
   try {
     // Extrai os dados do corpo da requisição
-    const { type, prompt, messages, systemMessage, image } = req.body;
+    const { type, prompt, messages, systemMessage, image, model } = req.body;
     let endpoint;
     let openaiResponse;
 
@@ -51,7 +56,7 @@ module.exports = async (req, res) => {
     } else if (type === 'chat') {
       endpoint = 'https://api.openai.com/v1/chat/completions';
       const payload = {
-        model: 'gpt-4o',
+        model: model || 'gpt-4o',
         messages: [
           { role: 'system', content: systemMessage || 'Você é um assistente de IA versátil e prestativo, capaz de gerar texto, criar imagens e interagir de forma inteligente e contextual. Responda em português.' },
           ...messages
@@ -73,25 +78,29 @@ module.exports = async (req, res) => {
         if (!image || !prompt) {
              return res.status(400).json({ error: 'Requisição de edição de imagem inválida. Requer imagem e prompt.' });
         }
-        
-        const imageResponse = await fetch(image); // 'image' is the data URL
-        const imageBlob = await imageResponse.blob();
 
-        const formData = new FormData();
-        formData.append('prompt', prompt);
-        formData.append('image', imageBlob, 'image.png'); // DALL-E 2 requires a PNG
-        formData.append('model', 'dall-e-2');
-        formData.append('n', 1);
-        formData.append('size', '1024x1024');
+        endpoint = 'https://api.openai.com/v1/chat/completions';
+        const payload = {
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: prompt },
+                  { type: 'image_url', image_url: { url: image, detail: 'high' } }
+                ]
+              }
+            ],
+            max_tokens: 2048,
+        };
 
-        endpoint = 'https://api.openai.com/v1/images/edits';
-        
         openaiResponse = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
             },
-            body: formData,
+            body: JSON.stringify(payload),
         });
 
     } else {
@@ -102,9 +111,6 @@ module.exports = async (req, res) => {
 
     if (!openaiResponse.ok) {
       console.error('Erro na API da OpenAI:', data);
-      if (type === 'image-edit' && data.error && data.error.message.includes('must be a square PNG')) {
-          return res.status(openaiResponse.status).json({ error: 'A imagem precisa ser um arquivo PNG quadrado para edição. Por favor, ajuste a imagem e tente novamente.', details: data });
-      }
       return res.status(openaiResponse.status).json({ error: 'A API da OpenAI retornou um erro.', details: data });
     }
 
@@ -114,4 +120,8 @@ module.exports = async (req, res) => {
     console.error('Erro no Servidor:', error);
     res.status(500).json({ error: 'Ocorreu um erro interno no servidor.', details: error.message });
   }
-};
+});
+
+app.listen(port, () => {
+  console.log(`Servidor rodando em http://localhost:${port}`);
+});
